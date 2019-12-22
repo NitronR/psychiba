@@ -43,6 +43,7 @@ public class AdminController {
     public Admin updateAdmin(@PathVariable(value = "id") Long id, @Valid @RequestBody Admin admin) throws Exception {
         Admin p = adminRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
         p.setName(admin.getName());
+        p.setEmail(admin.getEmail());
         return adminRepository.save(p);
     }
 

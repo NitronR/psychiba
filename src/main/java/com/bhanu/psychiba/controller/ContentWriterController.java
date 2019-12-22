@@ -44,6 +44,7 @@ public class ContentWriterController {
             @Valid @RequestBody ContentWriter contentWriter) throws Exception {
         ContentWriter p = cwRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
         p.setName(contentWriter.getName());
+        p.setEmail(contentWriter.getEmail());
         return cwRepository.save(p);
     }
 
