@@ -1,33 +1,43 @@
 package com.bhanu.psychiba.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import com.bhanu.psychiba.Constants;
 
 import lombok.Getter;
 import lombok.Setter;
 
-// TODO M-M with content writer
+import java.util.*;
+
 @Entity
 @Table(name = "questions")
 public class Question extends Auditable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
-    private Long id;
-    
+
     @NotBlank
     @Getter
     @Setter
+    @Column(length = Constants.MAX_QUESTION_LENGTH)
     private String questionText;
 
     @NotBlank
     @Getter
     @Setter
+    @Column(length = Constants.MAX_ANSWER_LENGTH)
     private String correctAnswer;
+
+    @Getter
+    @Setter
+    @NotNull
+    private GameMode gameMode;
+
+    @Getter
+    @Setter
+    @OneToMany(mappedBy = "question")
+    private List<EllenAnswer> ellenAnswers;
 
 }

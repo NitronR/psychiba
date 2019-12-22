@@ -1,25 +1,38 @@
 package com.bhanu.psychiba.model;
 
+import java.util.Map;
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
 
-// TODO 1 game many rounds
 @Entity
 @Table(name = "rounds")
 public class Round extends Auditable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @ManyToOne
     @Getter
     @Setter
-    private Long id;
+    private Game game;
 
+    @NotNull
     @Getter
     @Setter
     private Long roundNumber;
+
+    @ManyToOne
+    @Getter
+    @Setter
+    @NotNull
+    private Question question;
+
+    @ManyToMany
+    @Getter
+    @Setter
+    private Map<Player, PlayerAnswer> playerAnswers;
 }

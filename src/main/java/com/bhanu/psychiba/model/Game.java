@@ -6,37 +6,61 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
-// TODO one to one with game leader
-// TODO 1 to many to round for game rounds
-// TODO 1 to many to player for participants
+import java.util.*;
+
 @Entity
 @Table(name = "games")
 public class Game extends Auditable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     @Setter
-    private Long id;
+    @NonNull
+    private int numRounds;
 
     @Getter
     @Setter
-    @Enumerated(EnumType.ORDINAL)
+    @NonNull
+    private int currentRound = 0;
+
+    @NotNull
+    @Getter
+    @Setter
+    @ManyToMany
+    private Map<Player, Stats> playerStats;
+
+    @Getter
+    @Setter
+    @ManyToMany
+    private List<Player> players;
+
+    @NotNull
+    @Getter
+    @Setter
     private GameMode gameMode;
 
-    // for enum, we have specific choices of 5, 10, 20, infinity
-    // integer is not suitable I think?
-    // for enum, what would be the most appropriate method?
+    @NotNull
+    @Getter
+    @Setter
+    private GameStatus gameStatus = GameStatus.JOINING;
 
-    // I think game state enum would be more appropriate than is_over
-    // Like JOINING, IN_PROGRESS, OVER
-}
+    @ManyToOne
+    @NotNull
+    @Getter
+    @Setter
+    private Player leader;
 
-// not sure where to place this
-enum GameMode {
-    TRUTH_COMES_OUT, MOVIE_BLUFF, WORD_UP, IS_THAT_A_FACT
+    @Getter
+    @Setter
+    @NotNull
+    @OneToMany(mappedBy = "game")
+    private List<Round> rounds;
 }

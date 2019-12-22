@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.bhanu.psychiba.model.PlayerStats;
+import com.bhanu.psychiba.model.Stats;
 import com.bhanu.psychiba.repository.PlayerStatsRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,33 +27,33 @@ public class PlayerStatsController {
 
     // not sure if these are required
     @GetMapping("/player_stats")
-    public List<PlayerStats> getAllPlayerStats() {
+    public List<Stats> getAllPlayerStats() {
         return statsRepository.findAll();
     }
 
     @PostMapping("/player_stats")
-    public PlayerStats createPlayerStats(@Valid @RequestBody PlayerStats playerStats) {
+    public Stats createPlayerStats(@Valid @RequestBody Stats playerStats) {
         return statsRepository.save(playerStats);
     }
 
     @GetMapping("/player_stats/{id}")
-    public PlayerStats getPlayerStatsById(@PathVariable(value = "id") Long id) throws Exception {
+    public Stats getPlayerStatsById(@PathVariable(value = "id") Long id) throws Exception {
         return statsRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
     }
 
     @PutMapping("/player_stats/{id}")
-    public PlayerStats updatePlayerStats(@PathVariable(value = "id") Long id,
-            @Valid @RequestBody PlayerStats playerStats) throws Exception {
-        PlayerStats p = statsRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
-        p.setNumPlayed(playerStats.getNumPlayed());
-        p.setNumPsyched(playerStats.getNumPsyched());
-        p.setNumPsychedBy(playerStats.getNumPsychedBy());
+    public Stats updatePlayerStats(@PathVariable(value = "id") Long id, @Valid @RequestBody Stats playerStats)
+            throws Exception {
+        Stats p = statsRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
+        p.setGotPsychedCount(playerStats.getGotPsychedCount());
+        p.setPsychedOthersCount(playerStats.getPsychedOthersCount());
+        p.setCorrectAnswers(playerStats.getCorrectAnswers());
         return statsRepository.save(p);
     }
 
     @DeleteMapping("/player_stats/{id}")
     public ResponseEntity<?> deletePlayerStats(@PathVariable(value = "id") Long id) throws Exception {
-        PlayerStats p = statsRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
+        Stats p = statsRepository.findById(id).orElseThrow(() -> new Exception("Something went wrong."));
         statsRepository.delete(p);
         return ResponseEntity.ok().build();
     }
