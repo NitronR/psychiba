@@ -18,7 +18,7 @@ public class Player extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     @Setter
-    protected Long id;
+    private Long id;
     
     @NotBlank
     @Getter
