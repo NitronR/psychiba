@@ -1,0 +1,2 @@
+Psych game invite
+{player_name} has invited you to a game of Psych! Here is the game code:{game_code}.

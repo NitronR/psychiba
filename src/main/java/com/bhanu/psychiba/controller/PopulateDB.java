@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.bhanu.psychiba.Constants;
-import com.bhanu.psychiba.Utils;
+import com.bhanu.psychiba.utils.Utils;
 import com.bhanu.psychiba.model.GameMode;
 import com.bhanu.psychiba.model.Player;
 import com.bhanu.psychiba.model.Question;

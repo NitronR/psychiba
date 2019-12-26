@@ -1,4 +1,4 @@
-package com.bhanu.psychiba.reqbody;
+package com.bhanu.psychiba.forms;
 
 import javax.validation.constraints.NotNull;
 
