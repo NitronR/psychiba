@@ -23,7 +23,7 @@ public class Round extends Auditable {
     @NotNull
     @Getter
     @Setter
-    private Long roundNumber;
+    private int roundNumber;
 
     @ManyToOne
     @Getter

@@ -1,11 +1,16 @@
 package com.bhanu.psychiba.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import com.bhanu.psychiba.forms.InviteForm;
 import com.bhanu.psychiba.model.Game;
 import com.bhanu.psychiba.model.GameMode;
+import com.bhanu.psychiba.model.GameStatus;
 import com.bhanu.psychiba.model.Player;
+import com.bhanu.psychiba.model.Question;
+import com.bhanu.psychiba.model.Round;
 import com.bhanu.psychiba.repository.GameRepository;
 import com.bhanu.psychiba.repository.PlayerRepository;
 import com.bhanu.psychiba.repository.QuestionRepository;
@@ -34,9 +39,9 @@ public class GameManager {
     @Autowired
     RoundRepository roundRepository;
 
-    @GetMapping("/create/{pid}/{gm}/{nr}")
+    @GetMapping("/create/{pid}/{gm}/{nr}/{num_ellens}")
     public String createGame(@PathVariable(value = "pid") Long playerId, @PathVariable(value = "gm") int gm,
-            @PathVariable(value = "nr") int numRounds) {
+            @PathVariable(value = "nr") int numRounds, @PathVariable(value = "num_ellens") int numEllens) {
         Player leader = playerRepository.findById(playerId).orElseThrow();
         // TODO interpret game mode
         GameMode gameMode = GameMode.IS_THAT_A_FACT;
@@ -45,6 +50,7 @@ public class GameManager {
         game.setLeader(leader);
         game.setNumRounds(numRounds);
         game.setGameMode(gameMode);
+        game.setNumEllens(numEllens);
 
         game.getPlayers().add(leader);
 
@@ -54,9 +60,20 @@ public class GameManager {
     }
 
     @GetMapping("/join/{pid}/{gc}")
-    public String joinGame(@PathVariable(value = "pid") Long pid, @PathVariable(value = "gc") String gameCode){
+    public String joinGame(@PathVariable(value = "pid") Long pid, @PathVariable(value = "gc") String gameCode) {
         Game game = gameRepository.findById(Utils.getGameIdFromGameCode(gameCode)).orElseThrow();
+
+        // cannot join if status is not joining
+        if (game.getGameStatus() != GameStatus.JOINING) {
+            return "fail: joining is already over";
+        }
+
         Player player = playerRepository.findById(pid).orElseThrow();
+
+        // check if already joined
+        if(game.getPlayers().contains(player)){
+            return "fail: you have already joined";
+        }
 
         game.getPlayers().add(player);
 
@@ -83,5 +100,55 @@ public class GameManager {
         Utils.sendInvites(inviteForm.getEmails(), player.getName(), gameCode);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/start/{pid}/{gid}")
+    public String startGame(@PathVariable(value = "pid") Long pid, @PathVariable(value = "gid") Long gameId) {
+        Player player = playerRepository.findById(pid).orElseThrow();
+        Game game = gameRepository.findById(gameId).orElseThrow();
+
+        // game cannot start if already started
+        if (game.getGameStatus() != GameStatus.JOINING) {
+            return "fail: game has already started";
+        }
+
+        // only leader can start the game
+        if (!game.getLeader().equals(player)) {
+            return "fail: only the leader can start the game";
+        }
+
+        // at least 2 players to start a game
+        if (game.getPlayers().size() < 2) {
+            return "fail: atleast 2 players should join for starting the game";
+        }
+
+        // start game and create first round
+        game.setGameStatus(GameStatus.IN_PROGRESS);
+        game.setCurrentRound(1);
+        createCurrentRound(game);
+
+        gameRepository.save(game);
+
+        return "success";
+    }
+
+    // not sure where to place this
+    private Round createCurrentRound(Game game) {
+        Round round = new Round();
+
+        round.setRoundNumber(game.getCurrentRound());
+        round.setQuestion(getRandomQuestion(game.getGameMode()));
+        round.setGame(game);
+
+        roundRepository.save(round);
+
+        return round;
+    }
+
+    // improve logic
+    private Question getRandomQuestion(GameMode gameMode) {
+        List<Question> questions = quesRepository.findByGameMode(gameMode);
+        int questionCount = questions.size(), rowNum = Utils.getRandomInt(0, (int) questionCount - 1);
+        return questions.get(rowNum);
     }
 }

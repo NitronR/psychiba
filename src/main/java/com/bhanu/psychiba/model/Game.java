@@ -42,6 +42,11 @@ public class Game extends Auditable {
     @Getter
     @Setter
     private GameStatus gameStatus = GameStatus.JOINING;
+    
+    @Getter
+    @Setter
+    @NotNull
+    private int numEllens;
 
     @ManyToOne
     @Getter

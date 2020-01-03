@@ -69,8 +69,8 @@ public class Utils {
         // TODO log all emails sent
     }
 
-    public static String getGameCode(Long gameid) {
-        int gameId = (int) (long) gameid - 1, base = StaticContent.getNumGameCodeWords();
+    public static String getGameCode(long gameid) {
+        int gameId = (int) gameid, base = StaticContent.getNumGameCodeWords();
         String gameCode = "";
 
         while (gameId > 0) {
@@ -89,6 +89,11 @@ public class Utils {
             gameId = gameId * base + StaticContent.getWordIndex(words[i]);
         }
 
-        return gameId + 1;
+        return gameId;
+    }
+
+    public static int getRandomInt(int min, int max) {
+		Random r = new Random();
+		return r.nextInt((max - min) + 1) + min;
     }
 }

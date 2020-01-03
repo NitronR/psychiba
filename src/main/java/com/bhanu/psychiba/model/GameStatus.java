@@ -1,5 +1,5 @@
 package com.bhanu.psychiba.model;
 
-enum GameStatus {
+public enum GameStatus {
     JOINING, IN_PROGRESS, OVER
 }
