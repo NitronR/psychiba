@@ -37,7 +37,7 @@ public class Game extends Auditable {
     @Getter
     @Setter
     @ManyToMany
-    private List<Player> players;
+    private List<Player> players = new ArrayList<>();
 
     @Getter
     @Setter

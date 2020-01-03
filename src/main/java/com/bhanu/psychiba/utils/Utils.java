@@ -70,10 +70,25 @@ public class Utils {
     }
 
     public static String getGameCode(Long gameid) {
-        int gameId = (int) (long) gameid - 1, numWords = StaticContent.getNumGameCodeWords(), pos1 = gameId % numWords,
-                pos2 = gameId / numWords;
-        String gameCode = StaticContent.getGameCodeWord(pos1) + " " + StaticContent.getGameCodeWord(pos2);
+        int gameId = (int) (long) gameid - 1, base = StaticContent.getNumGameCodeWords();
+        String gameCode = "";
+
+        while (gameId > 0) {
+            gameCode += StaticContent.getGameCodeWord(gameId % base) + "";
+            gameId /= base;
+        }
 
         return gameCode;
+    }
+
+    public static Long getGameIdFromGameCode(String gameCode) {
+        String words[] = gameCode.split(" ");
+        Long gameId = 0L;
+        int base = StaticContent.getNumGameCodeWords();
+        for (int i = words.length - 1; i >= 0; i--) {
+            gameId = gameId * base + StaticContent.getWordIndex(words[i]);
+        }
+
+        return gameId + 1;
     }
 }
