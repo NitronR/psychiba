@@ -1,17 +1,24 @@
 package com.bhanu.psychiba.utils;
 
+import com.bhanu.psychiba.Constants;
+import com.bhanu.psychiba.StaticContent;
+import com.bhanu.psychiba.model.GameMode;
+import com.bhanu.psychiba.model.Question;
+import com.bhanu.psychiba.repository.QuestionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bhanu.psychiba.Constants;
-import com.bhanu.psychiba.StaticContent;
-
-import org.springframework.data.util.Pair;;
+;
 
 public class Utils {
 
@@ -92,8 +99,18 @@ public class Utils {
         return gameId;
     }
 
-    public static int getRandomInt(int min, int max) {
+    private static int getRandomInt(int min, int max) {
 		Random r = new Random();
 		return r.nextInt((max - min) + 1) + min;
+    }
+
+    @Autowired
+    private static QuestionRepository questionRepository;
+
+    // TODO improve logic
+    public static Question getRandomQuestion(GameMode gameMode) {
+        List<Question> questions = questionRepository.findByGameMode(gameMode);
+        int questionCount = questions.size(), rowNum = Utils.getRandomInt(0, (int) questionCount - 1);
+        return questions.get(rowNum);
     }
 }

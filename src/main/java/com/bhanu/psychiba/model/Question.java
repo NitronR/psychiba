@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.bhanu.psychiba.Constants;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +38,47 @@ public class Question extends Auditable {
 
     @Getter
     @Setter
+    @JsonManagedReference
     @OneToMany(mappedBy = "question")
-    private List<EllenAnswer> ellenAnswers;
+    private List<EllenAnswer> ellenAnswers = new ArrayList<>();
+
+    private Question(Builder builder) {
+        setCorrectAnswer(builder.correctAnswer);
+        setGameMode(builder.gameMode);
+        setQuestionText(builder.questionText);
+    }
+
+    public Question() {
+    }
+
+    public static class Builder {
+        @NotBlank
+        private String questionText;
+
+        @NotBlank
+        private String correctAnswer;
+
+        @NotNull
+        private GameMode gameMode;
+
+        public Builder questionText(String questionText) {
+            this.questionText = questionText;
+            return this;
+        }
+
+        public Builder correctAnswer(String correctAnswer) {
+            this.correctAnswer = correctAnswer;
+            return this;
+        }
+
+        public Builder gameMode(GameMode gameMode) {
+            this.gameMode = gameMode;
+            return this;
+        }
+
+        public Question build() {
+            return new Question(this);
+        }
+    }
 
 }

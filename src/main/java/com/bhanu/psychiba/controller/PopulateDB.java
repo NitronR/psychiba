@@ -33,10 +33,10 @@ public class PopulateDB {
             String fileName = fileMode.getKey();
             GameMode gameMode = fileMode.getValue();
             for (Pair<String, String> questionAnswer : Utils.readQAFile(fileName)) {
-                Question question = new Question();
-                question.setQuestionText(questionAnswer.getFirst());
-                question.setCorrectAnswer(questionAnswer.getSecond());
-                question.setGameMode(gameMode);
+                Question question = new Question.Builder()
+                        .questionText(questionAnswer.getFirst())
+                        .correctAnswer(questionAnswer.getSecond()).gameMode(gameMode)
+                        .build();
                 qRepository.save(question);
                 qnum++;
                 if (qnum > Constants.MAX_QUESTIONS_READ) {

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.bhanu.psychiba.Constants;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -34,5 +35,6 @@ public class EllenAnswer extends Auditable {
     @ManyToOne
     @Getter
     @Setter
+    @JsonBackReference
     private Question question;
 }

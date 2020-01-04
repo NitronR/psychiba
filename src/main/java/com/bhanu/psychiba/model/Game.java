@@ -1,15 +1,16 @@
 package com.bhanu.psychiba.model;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
+import com.bhanu.psychiba.exceptions.InsufficientPlayersException;
+import com.bhanu.psychiba.exceptions.InvalidActionForGameStateException;
+import com.bhanu.psychiba.exceptions.InvalidInputException;
+import com.bhanu.psychiba.utils.Utils;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Entity
@@ -27,34 +28,162 @@ public class Game extends Auditable {
 
     @Getter
     @Setter
-    private int currentRound = 0;
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Map<Player, Stats> playerStats = new HashMap<>();
 
     @Getter
     @Setter
     @ManyToMany
-    private Map<Player, Stats> playerStats;
-
-    @Getter
-    @Setter
-    @ManyToMany
-    private List<Player> players = new ArrayList<>();
+    @JsonIdentityReference
+    private Set<Player> players = new HashSet<>();
 
     @Getter
     @Setter
     private GameStatus gameStatus = GameStatus.JOINING;
-    
+
     @Getter
     @Setter
     @NotNull
-    private int numEllens;
+    private boolean hasEllen;
 
     @ManyToOne
     @Getter
     @Setter
+    @JsonIdentityReference
     private Player leader;
 
     @Getter
     @Setter
-    @OneToMany(mappedBy = "game")
-    private List<Round> rounds;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    private List<Round> rounds = new ArrayList<>();
+
+    public Game() {
+
+    }
+
+    private Game(Builder builder) {
+        setHasEllen(builder.hasEllen);
+        setNumRounds(builder.numRounds);
+        setGameMode(builder.gameMode);
+        setLeader(builder.leader);
+        try {
+            addPlayer(leader);
+        } catch (InvalidActionForGameStateException e) {
+            // ignore
+        }
+    }
+
+    public boolean hasPlayer(Player player) {
+        return playerStats.containsKey(player);
+    }
+
+    public void addPlayer(Player player) throws InvalidActionForGameStateException {
+        if (!gameStatus.equals(GameStatus.JOINING)) {
+            throw new InvalidActionForGameStateException("Cannot join game in this game state.");
+        }
+        if (playerStats.containsKey(player))
+            return;
+        players.add(player);
+        playerStats.put(player, new Stats());
+    }
+
+    private void startNewRound() {
+        // start game and create first round
+        Round round = new Round(this, Utils.getRandomQuestion(gameMode), 1);
+        rounds.add(round);
+        gameStatus = GameStatus.SUBMITTING_ANSWERS;
+    }
+
+    public void start() throws InvalidActionForGameStateException, InsufficientPlayersException {
+        // game cannot start if already started
+        if (!gameStatus.equals(GameStatus.JOINING)) {
+            throw new InvalidActionForGameStateException("Game has already started");
+        }
+
+        // at least 2 players to start a game
+        if (players.size() < 2) {
+            throw new InsufficientPlayersException("Atleast 2 players should be participating for starting the game");
+        }
+
+        startNewRound();
+    }
+
+    public void submitAnswer(Player player, String answer) throws InvalidActionForGameStateException {
+        if (!gameStatus.equals(GameStatus.SUBMITTING_ANSWERS)) {
+            throw new InvalidActionForGameStateException("Not accepting answers.");
+        }
+
+        Round round = getCurrentRound();
+        round.submitAnswer(player, answer);
+
+        if (round.getSubmittedAnswers().size() == players.size()) {
+            gameStatus = GameStatus.SELECTING_ANSWERS;
+        }
+    }
+
+    private Round getCurrentRound() {
+        return rounds.get(rounds.size() - 1);
+    }
+
+    public void selectAnswer(Player player, PlayerAnswer playerAnswer) throws InvalidActionForGameStateException, InvalidInputException {
+        if (!gameStatus.equals(GameStatus.SELECTING_ANSWERS)) {
+            throw new InvalidActionForGameStateException("Not selecting answers at the moment.");
+        }
+        Round round = getCurrentRound();
+        round.selectAnswer(player, playerAnswer);
+
+        if (round.getSelectedAnswers().size() == players.size()) {
+            if (rounds.size() < numRounds) {
+                gameStatus = GameStatus.GETTING_READY;
+                // TODO ellen stats here
+            } else {
+                gameStatus = GameStatus.OVER;
+            }
+        }
+    }
+
+    public void getReady(Player player) {
+        Round round = getCurrentRound();
+        round.getReady(player);
+        if (round.getReadyPlayers().size() == players.size()) {
+            startNewRound();
+        }
+    }
+
+    public String getState() {
+        // TODO
+        return "";
+    }
+
+    public static class Builder {
+        private int numRounds;
+        private GameMode gameMode;
+        private boolean hasEllen;
+        private Player leader;
+
+        public Builder numRounds(int numRounds) {
+            this.numRounds = numRounds;
+            return this;
+        }
+
+        public Builder gameMode(GameMode gameMode) {
+            this.gameMode = gameMode;
+            return this;
+        }
+
+        public Builder leader(Player leader) {
+            this.leader = leader;
+            return this;
+        }
+
+        public Game build() {
+            return new Game(this);
+        }
+
+        public Builder hasEllen(boolean hasEllen) {
+            this.hasEllen = hasEllen;
+            return this;
+        }
+    }
 }
