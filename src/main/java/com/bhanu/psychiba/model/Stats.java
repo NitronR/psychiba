@@ -20,4 +20,7 @@ public class Stats extends Auditable {
     @Setter
     private Long psychedOthersCount = 0L;
 
+    void incCorrectAnswer() {
+        correctAnswers++;
+    }
 }

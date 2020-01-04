@@ -107,6 +107,7 @@ public class PlayEndpoint {
             throw new IllegalGameException("Only the leader can start the game");
         }
 
+        // TODO normalize submitted answers
         game.submitAnswer(player, answer);
         gameRepository.save(game);
 
@@ -115,12 +116,11 @@ public class PlayEndpoint {
 
     @GetMapping("/select_answer/{pid}/{gid}/{paid}")
     public String selectAnswer(@PathVariable(value = "pid") Long pid, @PathVariable(value = "gid") Long gameId,
-                               @PathVariable(value = "paid") Long playerAnswerId) throws InvalidActionForGameStateException, InvalidInputException {
+                               @PathVariable(value = "answer") String answer) throws InvalidActionForGameStateException, InvalidInputException {
         Player player = playerRepository.findById(pid).orElseThrow();
         Game game = gameRepository.findById(gameId).orElseThrow();
-        PlayerAnswer playerAnswer = playerAnswerRepository.findById(playerAnswerId).orElseThrow();
 
-        game.selectAnswer(player, playerAnswer);
+        game.selectAnswer(player, answer);
         gameRepository.save(game);
         return "selected answer";
     }
@@ -138,7 +138,7 @@ public class PlayEndpoint {
     }
 
     @GetMapping("/get_game_state/{gid}")
-    public  String gameState(@PathVariable(value = "gid") Long gameId){
+    public  GameState gameState(@PathVariable(value = "gid") Long gameId){
         Game game = gameRepository.findById(gameId).orElseThrow();
         return game.getState();
     }

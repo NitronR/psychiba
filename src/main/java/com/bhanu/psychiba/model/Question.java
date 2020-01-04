@@ -51,6 +51,10 @@ public class Question extends Auditable {
     public Question() {
     }
 
+    boolean isCorrectAnswer(String answer) {
+        return correctAnswer.equals(answer);
+    }
+
     public static class Builder {
         @NotBlank
         private String questionText;

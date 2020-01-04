@@ -103,7 +103,7 @@ public class Game extends Auditable {
 
         // at least 2 players to start a game
         if (players.size() < 2) {
-            throw new InsufficientPlayersException("Atleast 2 players should be participating for starting the game");
+            throw new InsufficientPlayersException("At least 2 players should be participating for starting the game");
         }
 
         startNewRound();
@@ -122,16 +122,16 @@ public class Game extends Auditable {
         }
     }
 
-    private Round getCurrentRound() {
+    Round getCurrentRound() {
         return rounds.get(rounds.size() - 1);
     }
 
-    public void selectAnswer(Player player, PlayerAnswer playerAnswer) throws InvalidActionForGameStateException, InvalidInputException {
+    public void selectAnswer(Player player, String answer) throws InvalidActionForGameStateException, InvalidInputException {
         if (!gameStatus.equals(GameStatus.SELECTING_ANSWERS)) {
             throw new InvalidActionForGameStateException("Not selecting answers at the moment.");
         }
         Round round = getCurrentRound();
-        round.selectAnswer(player, playerAnswer);
+        round.selectAnswer(player, answer);
 
         if (round.getSelectedAnswers().size() == players.size()) {
             if (rounds.size() < numRounds) {
@@ -151,9 +151,17 @@ public class Game extends Auditable {
         }
     }
 
-    public String getState() {
-        // TODO
-        return "";
+    public GameState getState() {
+        return new GameState(this);
+    }
+
+    void answeredCorrect(Player player) {
+        playerStats.get(player).incCorrectAnswer();
+        // options to update player stats
+        // Player's stat attribute will be updated once the game is over
+        // or right here
+        player.getPlayerStats().incCorrectAnswer();
+        // or should be moved to the player class
     }
 
     public static class Builder {
