@@ -88,7 +88,6 @@ public class Round extends Auditable {
 
         // if the answer is correct
         if (question.isCorrectAnswer(answer)) {
-            game.answeredCorrect(player);
             selAnswerBuilder.answerType(AnswerType.CORRECT);
             selectedAnswers.put(player, selAnswerBuilder.build());
             return;
@@ -107,5 +106,51 @@ public class Round extends Auditable {
 
     void getReady(Player player) {
         readyPlayers.add(player);
+    }
+
+    List<PlayerAnswer> getSelectedPlayerAnswers() {
+        List<PlayerAnswer> playerAnswers = new ArrayList<>();
+
+        for (SelectedAnswer selectedAnswer : selectedAnswers.values()) {
+            if (selectedAnswer.getAnswerType().equals(AnswerType.PLAYER)) {
+                playerAnswers.add(selectedAnswer.getPlayerAnswer());
+            }
+        }
+        return playerAnswers;
+    }
+
+    Map<Player, Stats> calculateStats() {
+        Map<Player, Stats> roundStats = new HashMap<>();
+
+        // add entries for each player
+        for (Player player : selectedAnswers.keySet()) {
+            roundStats.put(player, new Stats());
+        }
+
+        // populate stats
+        for (Map.Entry<Player, SelectedAnswer> selectedAnswerEntry : selectedAnswers.entrySet()) {
+            Player player = selectedAnswerEntry.getKey();
+            SelectedAnswer selectedAnswer = selectedAnswerEntry.getValue();
+
+            switch (selectedAnswer.getAnswerType()) {
+                case CORRECT:
+                    roundStats.get(player).incCorrectAnswer();
+                    break;
+                case PLAYER:
+                    // increment got psyched count of player who
+                    // selected another player's submitted answer
+                    roundStats.get(player).incGotPsychedCount();
+
+                    // increment psychOther count of the player who's
+                    // answer psyched this player successfully
+                    Player psycher = selectedAnswer.getPlayerAnswer().getPlayer();
+                    roundStats.get(psycher).incPsychOthersCount();
+                    break;
+                case ELLEN:
+                    // TODO decide if ellen psychs are counted
+            }
+        }
+
+        return roundStats;
     }
 }

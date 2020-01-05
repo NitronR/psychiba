@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,7 +91,7 @@ public class Utils {
 
     public static Long getGameIdFromGameCode(String gameCode) {
         String words[] = gameCode.split(" ");
-        Long gameId = 0L;
+        long gameId = 0L;
         int base = StaticContent.getNumGameCodeWords();
         for (int i = words.length - 1; i >= 0; i--) {
             gameId = gameId * base + StaticContent.getWordIndex(words[i]);
@@ -100,8 +101,8 @@ public class Utils {
     }
 
     private static int getRandomInt(int min, int max) {
-		Random r = new Random();
-		return r.nextInt((max - min) + 1) + min;
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
     }
 
     @Autowired
@@ -112,5 +113,10 @@ public class Utils {
         List<Question> questions = questionRepository.findByGameMode(gameMode);
         int questionCount = questions.size(), rowNum = Utils.getRandomInt(0, (int) questionCount - 1);
         return questions.get(rowNum);
+    }
+
+    // TODO improve normalization
+    public static String normalize(String answer) {
+        return answer.toLowerCase().trim();
     }
 }

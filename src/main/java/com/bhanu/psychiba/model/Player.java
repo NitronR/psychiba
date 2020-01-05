@@ -54,6 +54,10 @@ public class Player extends Auditable {
 
     public Player(){}
 
+    void updateStats(Stats stats) {
+        playerStats.updateStats(stats);
+    }
+
     public static class Builder {
         private String name;
         private String psychFaceURL;

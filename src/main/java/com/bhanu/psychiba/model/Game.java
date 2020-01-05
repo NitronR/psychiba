@@ -109,6 +109,38 @@ public class Game extends Auditable {
         startNewRound();
     }
 
+    private void end() {
+        gameStatus = GameStatus.OVER;
+
+        // update player's overall stats
+        for (Map.Entry<Player, Stats> playerStatsEntry : playerStats.entrySet()) {
+            Player player = playerStatsEntry.getKey();
+            Stats stats = playerStatsEntry.getValue();
+
+            // not player.getStats().updateStats() because player
+            // is responsible for updating his stats
+            player.updateStats(stats);
+        }
+
+        // update ellen answers using this game's data
+        EllenAnswer.addEllenAnswers(this);
+    }
+
+    private void updateStats() {
+        Map<Player, Stats> roundStats = getCurrentRound().calculateStats();
+
+        // update game and player stats
+        for (Map.Entry<Player, Stats> roundStatsEntry : roundStats.entrySet()) {
+            Player player = roundStatsEntry.getKey();
+            Stats stats = roundStatsEntry.getValue();
+
+            // update game stats
+            playerStats.get(player).updateStats(stats);
+
+            // can update player's overall stats if required
+        }
+    }
+
     public void submitAnswer(Player player, String answer) throws InvalidActionForGameStateException {
         if (!gameStatus.equals(GameStatus.SUBMITTING_ANSWERS)) {
             throw new InvalidActionForGameStateException("Not accepting answers.");
@@ -135,10 +167,10 @@ public class Game extends Auditable {
 
         if (round.getSelectedAnswers().size() == players.size()) {
             if (rounds.size() < numRounds) {
+                updateStats();
                 gameStatus = GameStatus.GETTING_READY;
-                // TODO ellen stats here
             } else {
-                gameStatus = GameStatus.OVER;
+                end();
             }
         }
     }
@@ -153,15 +185,6 @@ public class Game extends Auditable {
 
     public GameState getState() {
         return new GameState(this);
-    }
-
-    void answeredCorrect(Player player) {
-        playerStats.get(player).incCorrectAnswer();
-        // options to update player stats
-        // Player's stat attribute will be updated once the game is over
-        // or right here
-        player.getPlayerStats().incCorrectAnswer();
-        // or should be moved to the player class
     }
 
     public static class Builder {

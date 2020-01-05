@@ -12,7 +12,7 @@ public class Stats extends Auditable {
 
     @Getter
     @Setter
-    private Long correctAnswers;
+    private Long correctAnswers = 0L;
     @Getter
     @Setter
     private Long gotPsychedCount = 0L;
@@ -20,7 +20,21 @@ public class Stats extends Auditable {
     @Setter
     private Long psychedOthersCount = 0L;
 
+    void updateStats(Stats stats) {
+        correctAnswers += stats.correctAnswers;
+        gotPsychedCount += stats.gotPsychedCount;
+        psychedOthersCount += stats.psychedOthersCount;
+    }
+
     void incCorrectAnswer() {
         correctAnswers++;
+    }
+
+    void incGotPsychedCount() {
+        gotPsychedCount++;
+    }
+
+    void incPsychOthersCount() {
+        psychedOthersCount++;
     }
 }

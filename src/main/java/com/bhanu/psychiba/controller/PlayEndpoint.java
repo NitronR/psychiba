@@ -107,7 +107,9 @@ public class PlayEndpoint {
             throw new IllegalGameException("Only the leader can start the game");
         }
 
-        // TODO normalize submitted answers
+        // normalize answer
+        answer = Utils.normalize(answer);
+
         game.submitAnswer(player, answer);
         gameRepository.save(game);
 
